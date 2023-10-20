@@ -14,6 +14,7 @@ import {
   MatSnackBarModule,
   MatSelectModule,
   MatCheckboxModule,
+  MatIconModule,
 } from "@angular/material";
 
 import { NgMultiSelectDropDownModule } from "ng-multiselect-dropdown";
@@ -73,6 +74,11 @@ import { CourseDifficultyComponent } from "./charts/course-difficulty/course-dif
 import { CurriculumUsageComponent } from "./charts/curriculum-usage/curriculum-usage.component";
 import { PresentationSkillsComponent } from "./charts/presentation-skills/presentation-skills.component";
 import { AdminComponent } from "./component/admin/admin.component";
+import { StarRatingComponent } from './component/star-rating/star-rating.component';
+import { ReviewDisplayComponent } from './component/review-display/review-display.component';
+import {MatTooltipModule} from "@angular/material/tooltip";
+import { ReviewEditComponent } from './component/review-edit/review-edit.component';
+import { TableComponent } from './component/display/table/table.component';
 
 // const routes: Routes = [
 //   { path: "add", component: AddDataComponent, canActivate: [AuthGuardService]},
@@ -131,6 +137,10 @@ import { AdminComponent } from "./component/admin/admin.component";
     CourseDifficultyComponent,
     CurriculumUsageComponent,
     PresentationSkillsComponent,
+    StarRatingComponent,
+    ReviewDisplayComponent,
+    ReviewEditComponent,
+    TableComponent,
   ],
   imports: [
     BrowserModule,
@@ -152,6 +162,8 @@ import { AdminComponent } from "./component/admin/admin.component";
     MatCheckboxModule,
     AngularFontAwesomeModule,
     HighchartsChartModule,
+    MatIconModule,
+    MatTooltipModule
   ],
 
   providers: [DataService, AuthGuardService, ChartHelperService],

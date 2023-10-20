@@ -6,20 +6,23 @@ import { AddDataComponent } from './component/add-data/add-data.component';
 import { AuthGuardService } from './auth-guard.service';
 import { ReferanceComponent } from "./component/reference/referance.component";
 import { DashboardComponent } from "./component/dashboard/dashboard.component";
+import {ReviewEditComponent} from "./component/review-edit/review-edit.component";
 
 const routes: Routes = [
   //{ path: '/display/data/s', redirectTo: '/', pathMatch: 'full' },
   //{ path: 'display/data', component: DisplayComponent },
-  
-  
+
+
   //{ path: '', component: DisplayComponent },
   //{ path: 'admin', component: AdminComponent },
- // { path: 'add/data', component: AddDataComponent, canActivate: [AuthGuardService] },
+  // { path: 'add/data', component: AddDataComponent, canActivate: [AuthGuardService] },
 
-  { path: "add", component: AddDataComponent, canActivate: [AuthGuardService]},
+  { path: "add", component: AddDataComponent, canActivate: [AuthGuardService], data: {target: 'indicator'}},
   { path: "reference", component: ReferanceComponent },
   { path: "login", component: AdminComponent },
   { path: "dashboard", component: DashboardComponent },
+  { path: "review/add", component: ReviewEditComponent, canActivate: [AuthGuardService], data: {target: 'review'}},
+  { path: "review/:id/edit", component: ReviewEditComponent },
   { path: "", component: DisplayComponent },
   { path: "", redirectTo: "display/data", pathMatch: "full" },
 

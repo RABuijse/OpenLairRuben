@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { DataService } from '../../data.service';
 import { Router } from '@angular/router';
-import { data } from '../../data.model';
+import { data } from '../../_models/data.model';
 import { FormControl, FormGroup, FormBuilder, FormArray, Validator, Validators } from '@angular/forms';
 import { color } from 'highcharts';
 
@@ -40,7 +40,7 @@ export class AddDataComponent implements OnInit {
       this.CUserName = JSON.parse(localStorage.getItem('currentUser')).username;
     }
 
-    
+
     //// form entries///////
     this.dataEntryForm = this.fb.group({
       learningEvents: ["", Validators.required],
@@ -57,7 +57,7 @@ export class AddDataComponent implements OnInit {
     return this.dataEntryForm.get('indicator')['controls'];
   }
 
-  /// adding new indicator and meterics entry/////////// 
+  /// adding new indicator and meterics entry///////////
   createIndicator(): FormGroup {
     return this.fb.group({
       indicatorName: ["", Validators.required],

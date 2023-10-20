@@ -1,0 +1,53 @@
+<table>
+  <tr>
+    <th>Learning Events</th>
+    <th>
+      <div>
+        <span class="learningactivities">(Learning) Activities</span>
+        <span style="margin-left: 2em">Indicators</span>
+      </div>
+    </th>
+  </tr>
+
+  <!-- for loop for learning events -->
+  <tr *ngFor="let learningEvents of data">
+    <td class="leraningevents">
+      {{ learningEvents.LearningEvents }}
+    </td>
+    <td>
+      <table class="w-100">
+        <tr class="activities" *ngFor="let LearningActivities of learningEvents.LearningActivities">
+          <td class="learningactivities">
+            {{ LearningActivities.Name }}
+          </td>
+          <td>
+            <table class="w-100">
+              <tr *ngFor="let indic of LearningActivities.indicator" class="indicator">
+                <td [ngClass]="{'w-50': searchMat}" style="min-width: 730px">
+                  <input class="step4" #indicatorCheckbox type="checkbox"
+                         [checked]="checkedMap.get(DisplayComponent.retrieveIndicatorReference(indic.indicatorName))"
+                         (click)="onCheckboxChange(indic)"/>
+
+                  <a class="sortable stepViewMetrics" (click)="getMetericsEmitter.emit(indic)">
+                        <span [innerHTML]="indic.indicatorName | sanitizeHtml: searchInd">
+                        </span>
+                  </a>
+                  <a class="sortable mx-1" (click)="onReviewEmitter.emit(indic)">
+                    <i class="fa fa-star-o"></i>
+                  </a>
+                </td>
+                <td *ngIf="searchMat" class="w-50">
+                  <a class="sortable">
+                        <span [innerHTML]="indic.metrics | sanitizeHtml: searchMat">
+                          {{ indic.metrics }}
+                        </span>
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>

@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { DataService } from '../../data.service';
-import { Router } from '@angular/router';
-import { FormControl, FormGroup, FormBuilder, FormArray, Validators } from '@angular/forms';
+import {Component, OnInit} from '@angular/core';
+import {DataService} from '../../data.service';
+import {Router} from '@angular/router';
+import {FormControl, FormGroup, FormBuilder, FormArray, Validators} from '@angular/forms';
 
 @Component({
   selector: 'app-admin',
@@ -10,11 +10,14 @@ import { FormControl, FormGroup, FormBuilder, FormArray, Validators } from '@ang
 })
 
 
-
 export class AdminComponent implements OnInit {
   public loginForm: FormGroup;
   username: string;
   password: string;
+
+  currentUrl: string = 'add';
+  additionalInfo: any;
+
   constructor(private dataService: DataService, private router: Router, private fb: FormBuilder) {
     this.loginForm = this.fb.group({
       username: ["", Validators.required],
@@ -22,6 +25,11 @@ export class AdminComponent implements OnInit {
 
 
     });
+/////////////////////////////HIER MAYBE
+    if (this.router.getCurrentNavigation().extras.state) {
+      this.currentUrl = this.router.getCurrentNavigation().extras.state.url;
+      this.additionalInfo = this.router.getCurrentNavigation().extras.state.additionalInfo;
+    }
   }
 
   ngOnInit() {
@@ -35,12 +43,12 @@ export class AdminComponent implements OnInit {
         res => {
           this.loginForm.reset();
           this.dataService.loggedIn = true;
-          this.router.navigate(['add'])
+          this.router.navigate([this.currentUrl], {state: {additionalInfo: this.additionalInfo}})
         },
 
         err => alert('User NOT found!')
       )
   }
-  
+
 
 }

@@ -1,19 +1,21 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpRequest } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { userInfo } from 'os';
-import { map } from 'rxjs/operators';
-import { User } from 'src/app/_models';
+import {Injectable} from '@angular/core';
+import {HttpClient, HttpHeaders, HttpRequest} from '@angular/common/http';
+import {BehaviorSubject, Observable} from 'rxjs';
+import {userInfo} from 'os';
+import {map} from 'rxjs/operators';
+import {User} from 'src/app/_models';
+import {review} from "./_models/review.model";
+import {LearningEvent} from "./_models/learningEvent.model";
 
 @Injectable({
   providedIn: 'root'
 })
 export class DataService {
   //private currentUserSubject: BehaviorSubject<User>;
- // public currentUser: Observable<User>;
+  // public currentUser: Observable<User>;
 
-  
-  loggedIn: boolean; 
+
+  loggedIn: boolean;
   //uri = 'https://programmingzen.org/openlair';
   //uri = 'https://backend.openlair.edutec.science/openlair'; //live
   //uri = 'http://localhost:49160/openlair';
@@ -24,14 +26,37 @@ export class DataService {
   //198.187.29.73
 
   constructor(private http: HttpClient) {
-   //this.currentUserSubject = new BehaviorSubject<User>(JSON.parse(localStorage.getItem('currentUser')));
-        //this.currentUser = this.currentUserSubject.asObservable();
+    //this.currentUserSubject = new BehaviorSubject<User>(JSON.parse(localStorage.getItem('currentUser')));
+    //this.currentUser = this.currentUserSubject.asObservable();
   }
 
-  getdata() {
-    return this.http.get(`${this.uri}/display/data`);
+  getdata(): Observable<LearningEvent[]> {
+    return this.http.get<LearningEvent[]>(`${this.uri}/display/data`);
   }
 
+  getReviews(indicatorId: string) {
+    return this.http.get(`${this.uri}/display/review/${indicatorId}`);
+  }
+
+  getReviewById(reviewId: number) {
+    return this.http.get(`${this.uri}/display/review/${reviewId}/edit`);
+  }
+
+  getReviewByIndicatorIdAndUsername(indicatorId: string, username: string) {
+    return this.http.get(`${this.uri}/display/review/${indicatorId}/${username}`);
+  }
+
+  addReview(review: review) {
+    return this.http.post(`${this.uri}/review/add`, review);
+  }
+
+  editReview(review: review) {
+    return this.http.put(`${this.uri}/review/edit`, review);
+  }
+
+  deleteReview(reviewId: string) {
+    return this.http.delete(`${this.uri}/review/${reviewId}/delete`);
+  }
 
   getsearchresult(search: any) {
     const httpOptions = {
@@ -39,7 +64,7 @@ export class DataService {
         'Content-Type': 'text/plain',
       })
     }
-    return this.http.post(`${this.uri}/getsearchmetrics`, { search, httpOptions });
+    return this.http.post(`${this.uri}/getsearchmetrics`, {search, httpOptions});
   }
 
   getsearchind(search: any) {
@@ -48,18 +73,18 @@ export class DataService {
         'Content-Type': 'text/plain',
       })
     }
-    return this.http.post(`${this.uri}/getsearchindicator`, { search, httpOptions });
+    return this.http.post(`${this.uri}/getsearchindicator`, {search, httpOptions});
   }
 
   addData(LearningEvents: any, LearningActivities: any, indicator: any) {
 
     const data1 = {
       LearningEvents: LearningEvents,
-      LearningActivities: 
-      {
-        Name: LearningActivities,
-        indicator: indicator,
-      }
+      LearningActivities:
+        {
+          Name: LearningActivities,
+          indicator: indicator,
+        }
     };
     console.log("addData:", data1);
     return this.http.post(`${this.uri}/add/data`, data1);
@@ -68,7 +93,7 @@ export class DataService {
   }
 
   //public get currentUserValue(): User {
-    //return this.currentUserSubject.value;
+  //return this.currentUserSubject.value;
   //}
 
   login(username: any, password: any) {
@@ -79,13 +104,13 @@ export class DataService {
       })
     }
 
-    return this.http.post(`${this.uri}/login`, { username, password, httpOptions }).pipe(map(user => {
+    return this.http.post(`${this.uri}/login`, {username, password, httpOptions}).pipe(map(user => {
       // store user details and basic auth credentials in local storage to keep user logged in between page refreshes
       //user.authdata = window.btoa(username + ':' + password);
       //this.currentUserSubject.next(user);
       localStorage.setItem('currentUser', JSON.stringify(user));
       //return user;
-  }));
+    }));
   }
 
   isLoggedIn(): boolean {
@@ -100,7 +125,7 @@ export class DataService {
       })
     }
 
-    return this.http.post(`${this.uri}/getActivities`, { searchAct, httpOptions });
+    return this.http.post(`${this.uri}/getActivities`, {searchAct, httpOptions});
   }
 
 
@@ -113,12 +138,7 @@ export class DataService {
     return this.http.post(`${this.uri}/upload`, formData);
 
 
-
   }
-
-
-
-
 }
 
 

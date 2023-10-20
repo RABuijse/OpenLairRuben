@@ -52,7 +52,6 @@ MongoClient.connect(mongoURL, { useUnifiedTopology: true }, function (err, db) {
   ///////////// Authentication /////////////////
 
   router.route('/login').post((req, res) => {
-    console.log('abc')
     var username = req.body.username;
     var password = req.body.password;
 
@@ -85,11 +84,10 @@ MongoClient.connect(mongoURL, { useUnifiedTopology: true }, function (err, db) {
 
   });
 
-
   ////////////////Read text from pdf //////////////
 
   var fs = require('fs');
- 
+
 
   /////////////Instruction for search data/////////////////
 
@@ -97,7 +95,7 @@ MongoClient.connect(mongoURL, { useUnifiedTopology: true }, function (err, db) {
     const metrics_name = req.body.search;
 
 
-    db.collection("treeStructure").find({ 'LearningActivities.indicator.metrics': new RegExp(metrics_name) }).toArray(function (error, documents) {
+    db.collection("treeStructure").find({'LearningActivities.indicator.metrics': new RegExp(metrics_name)}).toArray(function (error, documents) {
       if (err) throw error;
 
       res.send(documents);
@@ -109,7 +107,7 @@ MongoClient.connect(mongoURL, { useUnifiedTopology: true }, function (err, db) {
     const search_ind = req.body.search;
 
 
-    db.collection("treeStructure").find({ 'LearningActivities.indicator.indicatorName': { $regex: new RegExp(search_ind, "i") } }).toArray(function (error, result) {
+    db.collection("treeStructure").find({'LearningActivities.indicator.indicatorName': {$regex: new RegExp(search_ind, "i")}}).toArray(function (error, result) {
       if (err) throw error;
 
       res.send(result);
@@ -123,23 +121,23 @@ MongoClient.connect(mongoURL, { useUnifiedTopology: true }, function (err, db) {
     let currentEvent = req.body.LearningEvents;
     let currentActivity = req.body.LearningActivities.Name;
     let newIndicatorMetrics = req.body.LearningActivities.indicator;
-      db.collection("treeStructure").find({
-        'LearningActivities.Name': currentActivity
-      }).toArray(function (error, filterAct) {
-        if (!error) {
-          if (filterAct) {
-           // let val = Object.keys(filterAct).length;
-           // if(val > 1)
-           // {
-              let i = 0;
-              //let allEvents = ;
-              Object.values(filterAct).forEach(val => {
-                //console.log("Event: ", val.LearningEvents);
-                const eventIndex = i++;
-                let position = filterAct[eventIndex].LearningActivities.findIndex(item => item.Name == currentActivity);
-                const str1 = 'LearningActivities';
-                const learningAct = str1.concat(".", position, ".", "indicator");
-                db.collection("treeStructure").updateOne({
+    db.collection("treeStructure").find({
+      'LearningActivities.Name': currentActivity
+    }).toArray(function (error, filterAct) {
+      if (!error) {
+        if (filterAct) {
+          // let val = Object.keys(filterAct).length;
+          // if(val > 1)
+          // {
+          let i = 0;
+          //let allEvents = ;
+          Object.values(filterAct).forEach(val => {
+            //console.log("Event: ", val.LearningEvents);
+            const eventIndex = i++;
+            let position = filterAct[eventIndex].LearningActivities.findIndex(item => item.Name == currentActivity);
+            const str1 = 'LearningActivities';
+            const learningAct = str1.concat(".", position, ".", "indicator");
+            db.collection("treeStructure").updateOne({
                   LearningEvents: val.LearningEvents
                 }, {
                   $push: {
@@ -155,33 +153,33 @@ MongoClient.connect(mongoURL, { useUnifiedTopology: true }, function (err, db) {
                 function (err, res) {
                   if (err) throw err;
                 });
-              });
-           // }
-            // else {
-            // const eventIndex = filterAct.findIndex(element => element.LearningEvents === currentEvent);
-            // let position = filterAct[eventIndex].LearningActivities.findIndex(item => item.Name == currentActivity);
-            // const str1 = 'LearningActivities';
-            // const learningAct = str1.concat(".", position, ".", "indicator");
-            // db.collection("treeStructure").updateOne({
-            //   LearningEvents: currentEvent
-            // }, {
-            //   $push: {
-            //     [learningAct]: {
-            //       "indicatorName": newIndicatorMetrics[0].indicatorName,
-            //       "metrics": newIndicatorMetrics[0].metrics
-            //     }
-            //   }
-            // }, {
-            //   upsert: false,
-            //   multi: true
-            // },
-            //   function (err, res) {
-            //     if (err) throw err;
-            //   });
-            // }
-          }
+          });
+          // }
+          // else {
+          // const eventIndex = filterAct.findIndex(element => element.LearningEvents === currentEvent);
+          // let position = filterAct[eventIndex].LearningActivities.findIndex(item => item.Name == currentActivity);
+          // const str1 = 'LearningActivities';
+          // const learningAct = str1.concat(".", position, ".", "indicator");
+          // db.collection("treeStructure").updateOne({
+          //   LearningEvents: currentEvent
+          // }, {
+          //   $push: {
+          //     [learningAct]: {
+          //       "indicatorName": newIndicatorMetrics[0].indicatorName,
+          //       "metrics": newIndicatorMetrics[0].metrics
+          //     }
+          //   }
+          // }, {
+          //   upsert: false,
+          //   multi: true
+          // },
+          //   function (err, res) {
+          //     if (err) throw err;
+          //   });
+          // }
         }
-      });
+      }
+    });
   });
 
 
@@ -221,7 +219,86 @@ MongoClient.connect(mongoURL, { useUnifiedTopology: true }, function (err, db) {
   //     });
   // });
 
+  /////////////Instruction for review display/////////////////
 
+  router.route('/display/review/:id').get((req, res) => {
+
+    db.collection("review").find({'indicatorId': req.params.id}).toArray((err, data) => {
+      if (err)
+        console.log(err);
+      else
+        res.json(data);
+    })
+
+  });
+
+  router.route('/display/review/:id/edit').get((req, res) => {
+
+    db.collection("review").find({'_id': mongo.ObjectId(req.params.id)}).toArray((err, data) => {
+      if (err)
+        console.log(err);
+      else
+        res.json(data);
+    })
+
+  });
+
+  router.route('/display/review/:indicatorId/:username').get((req, res) => {
+
+    db.collection("review").find({'indicatorId': req.params.indicatorId, 'name': req.params.username}).toArray((err, data) => {
+      if (err)
+        console.log(err);
+      else
+        res.json(data);
+    })
+
+  });
+
+  router.route('/review/add').post((req, res) => {
+    const review = req.body;
+    db.collection("review").insertOne(review, (error, result) => {
+      if (err) {
+        console.log(err);
+      }
+      return res.status(200).send(result);
+    });
+  });
+
+  router.route('/review/edit').put((req, res) => {
+    const review = req.body;
+    db.collection("review").replaceOne({_id: mongo.ObjectId(review._id)},
+        {
+          "indicatorId": review.indicatorId,
+          "name": review.name,
+          "indicatorQuality": review.indicatorQuality,
+          "indicatorQualityNote": review.indicatorQualityNote,
+          "articleClarity": review.articleClarity,
+          "articleClarityNote": review.articleClarityNote,
+          "articleData": review.articleData,
+          "articleDataNote": review.articleDataNote,
+          "articleAnalysis": review.articleAnalysis,
+          "articleAnalysisNote": review.articleAnalysisNote,
+          "articleConclusion": review.articleConclusion,
+          "articleConclusionNote": review.articleConclusionNote,
+          "articleContribution": review.articleContribution,
+          "articleContributionNote": review.articleContributionNote
+        },
+        (error, result) => {
+      if (err) {
+        console.log(err);
+      }
+      return res.status(200).send(result);
+    });
+  });
+
+  router.route('/review/:reviewId/delete').delete((req, res) => {
+    db.collection("review").deleteOne({_id: mongo.ObjectId(req.params.reviewId)}, (error, result) => {
+      if (err) {
+        console.log(err);
+      }
+      return res.status(200).send(result);
+    });
+  });
 
 });
 

@@ -1,0 +1,46 @@
+.w-100 {
+  width: 100%;
+}
+
+.w-50 {
+  width: 50%;
+}
+
+th {
+  color: grey;
+  font-size: .85em;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  text-align: left;
+  padding-left: 1em;
+  padding-bottom: 0.5em;
+}
+
+.learningactivities {
+  width: 200px;
+}
+
+.activities:nth-child(odd) .learningactivities {
+  background-color: #f1f1f1;
+}
+
+.leraningevents:nth-child(odd) {
+  background-color: #f1f1f1;
+}
+
+.indicator:nth-child(odd) {
+  background-color: #f1f1f1;
+}
+
+.indicator:nth-child(even) {
+  background-color: white;
+}
+
+.leraningevents {
+  width: 177px;
+}
+
+.sortable {
+  cursor: pointer;
+}
+
