@@ -46,3 +46,8 @@
   color: #575353;
   cursor: pointer;
 }
+
+.reviewPlaceholder {
+  padding: 50px 110px 50px 110px;
+;
+}

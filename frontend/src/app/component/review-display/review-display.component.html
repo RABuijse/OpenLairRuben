@@ -7,6 +7,7 @@
   </div>
 </div>
 <mat-dialog-content class="reviewDialogContent">
+  <div *ngIf="reviews.length === 0" class="reviewPlaceholder">No Reviews have been submitted yet.</div>
   <div *ngFor="let review of reviews" class="rating-wrapper">
     <fieldset style="border-radius: 8px;">
       <legend>

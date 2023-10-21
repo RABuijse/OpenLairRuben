@@ -32,7 +32,7 @@
                         <span [innerHTML]="indic.indicatorName | sanitizeHtml: searchInd">
                         </span>
                   </a>
-                  <a class="sortable mx-1" (click)="onReviewEmitter.emit(indic)">
+                  <a class="sortable mx-1 stepReview" (click)="onReviewEmitter.emit(indic)">
                     <i class="fa fa-star-o"></i>
                   </a>
                 </td>

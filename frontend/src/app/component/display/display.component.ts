@@ -178,7 +178,7 @@ export class DisplayComponent implements OnInit {
       this.tableData$ = this.selectedLearningEvents$
     } else {
       this.tableData$ = this.selectedLearningEvents$.pipe(
-        // remove Activites from Events which are not selected
+        // remove Activities from Events which are not selected
         map(learningEvents => {
           return learningEvents.map(learningEvent => {
             learningEvent.LearningActivities = learningEvent.LearningActivities.filter(activity => {
