@@ -353,7 +353,8 @@ export class DisplayComponent implements OnInit {
   }
 
   static retrieveIndicatorReference(name: string) {
-    return name.match(/\[.*?]/g)[0];
+    const matches = name.match(/\[.*?]/g)
+    return matches.length > 0 ? matches[0] : null;
   }
 
   logIn() {
