@@ -24,7 +24,7 @@
             <table class="w-100">
               <tr *ngFor="let indic of LearningActivities.indicator" class="indicator">
                 <td [ngClass]="{'w-50': searchMat}" style="min-width: 730px">
-                  <input class="step4" #indicatorCheckbox type="checkbox"
+                  <input *ngIf="indic.indicatorName" class="step4" #indicatorCheckbox type="checkbox"
                          [checked]="checkedMap.get(DisplayComponent.retrieveIndicatorReference(indic.indicatorName))"
                          (click)="onCheckboxChange(indic)"/>
 
