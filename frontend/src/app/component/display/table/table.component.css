@@ -17,30 +17,52 @@ th {
 }
 
 .learningactivities {
-  width: 200px;
+  width: 170px;
 }
 
-.activities:nth-child(odd) .learningactivities {
-  background-color: #f1f1f1;
+.activities:nth-child(odd) {
+  .learningactivities {
+    background-color: #f1f1f1;
+  }
+
+  .indicator {
+    background-color: #f1f1f1;
+  }
+}
+
+.activities:nth-child(even) {
+  .learningactivities {
+    background-color: #e5e5e5;
+  }
+
+  .indicator {
+    background-color: #e5e5e5;
+  }
 }
 
 .leraningevents:nth-child(odd) {
   background-color: #f1f1f1;
 }
 
-.indicator:nth-child(odd) {
-  background-color: #f1f1f1;
-}
-
-.indicator:nth-child(even) {
-  background-color: white;
-}
-
 .leraningevents {
-  width: 177px;
+  width: 120px;
 }
 
 .sortable {
   cursor: pointer;
+}
+
+.review-icon, .reference-icon {
+  margin-left: 0.3em;
+}
+
+.indicator-content {
+  display: flex;
+  align-items: flex-start;
+}
+
+.indicator-text {
+  display: flex;
+  flex-wrap: wrap;
 }
 

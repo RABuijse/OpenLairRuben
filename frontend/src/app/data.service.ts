@@ -6,6 +6,10 @@ import {map} from 'rxjs/operators';
 import {User} from 'src/app/_models';
 import {review} from "./_models/review.model";
 import {LearningEvent} from "./_models/learningEvent.model";
+import {Reference} from "./_models/reference.model";
+import {indicator} from "./_models/indicator.model";
+import {LearningActivity} from "./_models/learningActivity.model";
+import {PathObject} from "./_models/pathObject.model";
 
 @Injectable({
   providedIn: 'root'
@@ -34,16 +38,36 @@ export class DataService {
     return this.http.get<LearningEvent[]>(`${this.uri}/display/data`);
   }
 
+  getEvents(): Observable<LearningEvent[]> {
+    return this.http.get<LearningEvent[]>(`${this.uri}/events`);
+  }
+
+  getActivities(): Observable<LearningActivity[]> {
+    return this.http.get<LearningActivity[]>(`${this.uri}/activities`);
+  }
+
+  getIndicators(): Observable<indicator[]> {
+    return this.http.get<indicator[]>(`${this.uri}/indicators`);
+  }
+
+  getIndicatorById(id: string): Observable<indicator> {
+    return this.http.get<indicator>(`${this.uri}/indicator/${id}`);
+  }
+
+  getPathByIndicatorId(id: string): Observable<PathObject> {
+    return this.http.get<PathObject>(`${this.uri}/path/${id}`);
+  }
+
   getReviews(indicatorId: string) {
     return this.http.get(`${this.uri}/display/review/${indicatorId}`);
   }
 
   getReviewById(reviewId: number) {
-    return this.http.get(`${this.uri}/display/review/${reviewId}/edit`);
+    return this.http.get<review>(`${this.uri}/display/review/${reviewId}/edit`);
   }
 
   getReviewByIndicatorIdAndUsername(indicatorId: string, username: string) {
-    return this.http.get(`${this.uri}/display/review/${indicatorId}/${username}`);
+    return this.http.get<review>(`${this.uri}/display/review/${indicatorId}/${username}`);
   }
 
   addReview(review: review) {
@@ -56,6 +80,30 @@ export class DataService {
 
   deleteReview(reviewId: string) {
     return this.http.delete(`${this.uri}/review/${reviewId}/delete`);
+  }
+
+  getReferences(): Observable<Reference[]> {
+    return this.http.get<Reference[]>(`${this.uri}/reference`);
+  }
+
+  getReferenceById(referenceId: string) {
+    return this.http.get(`${this.uri}/reference/${referenceId}`);
+  }
+
+  getReferenceByReferenceNumber(referenceNumber: string) {
+    return this.http.get<Reference>(`${this.uri}/reference/number/${referenceNumber}`);
+  }
+
+  addReference(reference: Reference) {
+    return this.http.post(`${this.uri}/reference/add`, reference)
+  }
+
+  updateReference(id, reference: Reference) {
+    return this.http.put(`${this.uri}/reference/${id}/edit`, reference);
+  }
+
+  deleteReference(referenceId: string) {
+    return this.http.delete(`${this.uri}/reference/${referenceId}/delete`);
   }
 
   getsearchresult(search: any) {
@@ -76,28 +124,19 @@ export class DataService {
     return this.http.post(`${this.uri}/getsearchindicator`, {search, httpOptions});
   }
 
-  addData(LearningEvents: any, LearningActivities: any, indicator: any) {
-
-    const data1 = {
-      LearningEvents: LearningEvents,
-      LearningActivities:
-        {
-          Name: LearningActivities,
-          indicator: indicator,
-        }
-    };
-    console.log("addData:", data1);
-    return this.http.post(`${this.uri}/add/data`, data1);
-
-
+  addIndicator(data: any) {
+    return this.http.post(`${this.uri}/indicator/add`, data);
   }
 
-  //public get currentUserValue(): User {
-  //return this.currentUserSubject.value;
-  //}
+  editIndicator(id, indicator: indicator) {
+    return this.http.put(`${this.uri}/indicator/${id}/edit`, indicator);
+  }
+
+  deleteIndicator(indicatorId){
+    return this.http.delete(`${this.uri}/indicator/${indicatorId}/delete`);
+  }
 
   login(username: any, password: any) {
-    console.log(username)
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'text/plain',
@@ -115,17 +154,6 @@ export class DataService {
 
   isLoggedIn(): boolean {
     return this.loggedIn;
-  }
-
-  getActivities(searchAct: any) {
-
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type': 'text/plain',
-      })
-    }
-
-    return this.http.post(`${this.uri}/getActivities`, {searchAct, httpOptions});
   }
 
 

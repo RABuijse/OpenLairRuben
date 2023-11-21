@@ -30,7 +30,7 @@ export class ReviewDisplayComponent implements OnInit {
   }
 
   private getReviews() {
-    this.dataService.getReviews(this.indicator.indicatorId).subscribe((reviews: review[]) => {
+    this.dataService.getReviews(this.indicator._id).subscribe((reviews: review[]) => {
       this.reviews = !this.loggedIn ? reviews : reviews.sort((e1, e2) => {
         if (e1.name === this.loggedIn.username) {
           return -1;
@@ -43,6 +43,9 @@ export class ReviewDisplayComponent implements OnInit {
       if (this.loggedIn && this.reviews.length > 0 && this.reviews[0].name === this.loggedIn.username) {
         this.reviewExistsForUser = true;
         this.buttonLabel = 'Edit Review';
+      } else {
+        this.reviewExistsForUser = false;
+        this.buttonLabel = 'Create Review'
       }
       this.calculateAverage(reviews)
     });
@@ -63,7 +66,7 @@ export class ReviewDisplayComponent implements OnInit {
   }
 
   createReview() {
-    this.router.navigate(['/review/add'], {state: {additionalInfo: {indicator: this.indicator}}});
+    this.router.navigate([`/review/add/${this.indicator._id}`]);
   }
 
   editReview(reviewId) {

@@ -2,6 +2,7 @@ import {LearningActivity} from "./learningActivity.model";
 
 export interface LearningEvent {
   _id?: any;
-  LearningEvents?: string;
-  LearningActivities?: LearningActivity[]
+  name?: string;
+  activityIds?: any[];
+  activities?: LearningActivity[];
 }

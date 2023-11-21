@@ -1,6 +1,8 @@
 import {indicator} from "./indicator.model";
 
 export interface LearningActivity {
-  Name?: string;
-  indicator?: indicator[]
+  _id?: any;
+  name?: string;
+  indicatorIds?: any[]
+  indicators?: indicator[]
 }

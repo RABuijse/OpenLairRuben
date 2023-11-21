@@ -33,14 +33,19 @@ export class SelectCheckAllComponent implements OnInit {
   }
 
   isChecked(): boolean {
-    return this.model.value && this.values.length
-      && this.model.value.length === this.values.length;
-
+    if (!this.model || !this.values) {
+      return false;
+    } else {
+      return this.model.value.length === this.values.length;
+    }
   }
 
 
   isIndeterminate(): boolean {
-    return this.model.value && this.values.length && this.model.value.length
+    if (!this.model || !this.values) {
+      return false;
+    }
+    return this.model.value.length
       && this.model.value.length < this.values.length;
   }
 

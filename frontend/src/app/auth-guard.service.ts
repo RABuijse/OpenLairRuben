@@ -7,10 +7,7 @@ import {DataService} from "./data.service";
 
 export class AuthGuardService implements CanActivate {
 
-  additionalInfo: any;
-
-  constructor(private dataService: DataService,
-              private router: Router) {
+  constructor(private router: Router) {
   }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
@@ -20,10 +17,7 @@ export class AuthGuardService implements CanActivate {
       return true;
     } else {
       //this.router.navigate(['/login']);
-      if (this.router.getCurrentNavigation().extras.state) {
-        this.additionalInfo = this.router.getCurrentNavigation().extras.state.additionalInfo;
-      }
-      this.router.navigate(['/login'], {state: {url: state.url, additionalInfo: this.additionalInfo}});
+      this.router.navigate(['/login'], {state: {url: state.url}});
       return false;
     }
   }

@@ -22,8 +22,10 @@ import { ChartHelperService } from "src/app/chart-helper.service";
 import {review} from "../../_models/review.model";
 import {Observable} from "rxjs";
 import {LearningEvent} from "../../_models/learningEvent.model";
-import {map, tap} from "rxjs/operators";
+import {filter, map, shareReplay, tap} from "rxjs/operators";
 import {indicator} from "../../_models/indicator.model";
+import {HeaderService} from "../header/header.service";
+import {LearningActivity} from "../../_models/learningActivity.model";
 
 @Component({
   selector: "app-display",
@@ -47,7 +49,7 @@ export class DisplayComponent implements OnInit {
   metrics_list: string[];
   reviews: review[];
   loggedIn: any;
-  learningEvents$: Observable<LearningEvent[]>;
+  treeData$: Observable<LearningEvent[]>;
   learningEventsOptions$: Observable<string[]>;
   selectedLearningEvents$: Observable<LearningEvent[]>;
   learningActivitiesOptions$: Observable<string[]>;
@@ -65,9 +67,11 @@ export class DisplayComponent implements OnInit {
     private snackbar: MatSnackBar,
     public dialog: MatDialog,
     private sanitizer: DomSanitizer,
+    private headerTemplateService: HeaderService
   ) {
+    this.headerTemplateService.setHeader('display');
     this.loggedIn = JSON.parse(localStorage.getItem('currentUser'));
-    this.learningEvents$ = this.dataService.getdata();
+    this.treeData$ = this.dataService.getdata();
   }
 
   ngOnInit() {
@@ -89,10 +93,10 @@ export class DisplayComponent implements OnInit {
     const previousSelectedEvents: string[] = JSON.parse(localStorage.getItem('selectedEventsInit'));
     const previousSelectedActivities: string[] = JSON.parse(localStorage.getItem('selectedActivitiesInit'));
     const previousSelectedIndicators: indicator[] = JSON.parse(localStorage.getItem('selectedIndicatorsInit'));
-    this.learningEventsOptions$ = this.learningEvents$.pipe(
+    this.learningEventsOptions$ = this.dataService.getEvents().pipe(
       map(learningEvents => {
         return learningEvents.map(learningEvent => {
-          return learningEvent.LearningEvents
+          return learningEvent.name;
         })
       }),
       tap(options => {
@@ -115,12 +119,11 @@ export class DisplayComponent implements OnInit {
     }
     if (indicators) {
       indicators.forEach(indicator => {
-        const indicatorReference = DisplayComponent.retrieveIndicatorReference(indicator.indicatorName);
-        this.checkedMap.set(indicatorReference, true);
-        this.indicatorMap.set(indicatorReference, indicator)
+        this.checkedMap.set(indicator._id, true);
+        this.indicatorMap.set(indicator._id, indicator)
       })
       localStorage.setItem("selectedIndicatorsInit", JSON.stringify(indicators))
-      this.ind_list = indicators.map(indicator => indicator.indicatorName);
+      this.ind_list = indicators.map(indicator => indicator.Title);
     }
   }
 
@@ -129,19 +132,19 @@ export class DisplayComponent implements OnInit {
       eventValue = this.allEventOptions;
     }
     this.resetTable(true);
-    this.selectedLearningEvents$ = this.learningEvents$.pipe(
+    this.selectedLearningEvents$ = this.treeData$.pipe(
       map(learningEvents => {
-        return learningEvents.filter(learningEvent => eventValue.includes(learningEvent.LearningEvents));
+        return learningEvents.filter(learningEvent => eventValue.includes(learningEvent.name));
       }));
 
     this.tableData$ = this.selectedLearningEvents$;
 
     this.learningActivitiesOptions$ = this.tableData$.pipe(
       map(learningEvents => {
-        return [].concat(...learningEvents.map(learningEvent => learningEvent.LearningActivities))
+        return [].concat(...learningEvents.map(learningEvent => learningEvent.activities))
       }),
-      map(learningActivities => {
-        return [...new Set(learningActivities.map(learningActivity => learningActivity.Name))];
+      map((learningActivities: LearningActivity[]) => {
+        return [...new Set(learningActivities.map(learningActivity => learningActivity.name))];
       })
     )
 
@@ -181,15 +184,15 @@ export class DisplayComponent implements OnInit {
         // remove Activities from Events which are not selected
         map(learningEvents => {
           return learningEvents.map(learningEvent => {
-            learningEvent.LearningActivities = learningEvent.LearningActivities.filter(activity => {
-              return this.selectedLearningActivities.includes(activity.Name);
+            learningEvent.activities = learningEvent.activities.filter(activity => {
+              return this.selectedLearningActivities.includes(activity.name);
             })
             return learningEvent;
           })
         }),
         // remove Events which have no Activity left
         map(learningEvents => {
-          return learningEvents.filter(learningEvent => learningEvent.LearningActivities.length > 0);
+          return learningEvents.filter(learningEvent => learningEvent.activities.length > 0);
         })
       );
     }
@@ -201,30 +204,18 @@ export class DisplayComponent implements OnInit {
     this.dialog.open(this.secondDialog);
   }
 
-
-  ///////////////////   search by indicator ///////////////
-  searchIndicator(search: any) {
-  }
-
-
-  ///////////////////   search by metrics ///////////////
-  learningEventsChangeOnSearch(search: any) {
-  }
-
-
   ////////////////// function for checkbox to select indicator   //////////////////
   onCheckboxChange(indic: indicator) {
-    const indicatorId = DisplayComponent.retrieveIndicatorReference(indic.indicatorName);
-    const checked = !this.checkedMap.get(indicatorId)
-    this.checkedMap.set(indicatorId, checked);
+    const checked = !this.checkedMap.get(indic._id)
+    this.checkedMap.set(indic._id, checked);
     if (checked) {
-      this.ind_list.push(indic.indicatorName)
-      this.indicatorMap.set(indicatorId, indic);
+      this.ind_list.push(indic.Title)
+      this.indicatorMap.set(indic._id, indic);
     } else {
-      const index = this.ind_list.indexOf(indic.indicatorName);
+      const index = this.ind_list.indexOf(indic.Title);
       if (index !== -1) {
         this.ind_list.splice(index, 1);
-        this.indicatorMap.set(indicatorId, null);
+        this.indicatorMap.set(indic._id, null);
       }
     }
     setTimeout(() => {
@@ -242,7 +233,7 @@ export class DisplayComponent implements OnInit {
     const filename = 'Indicators TEXT.txt';
     if (selectedIndicatorList.length > 0) {
       const content = selectedIndicatorList.map((indicator, index) => {
-        return `${index + 1} Indicator Name: ${indicator.indicatorName}\n\tMetrics: Metrics: ${indicator.metrics}\n\n`
+        return `${index + 1} Indicator Name: ${indicator.Title}${indicator.referenceNumber}\n\tMetrics: ${indicator.metrics}\n\n`
       }).join('')
 
       var a = document.createElement('a')
@@ -261,7 +252,7 @@ export class DisplayComponent implements OnInit {
     const selectedIndicatorList = [...this.indicatorMap.values()].filter(indicator => indicator);
     if (selectedIndicatorList.length > 0) {
       const indicatorObjects = selectedIndicatorList.map(indicator => {
-        return {[indicator.indicatorName]: indicator.metrics.split(",")}
+        return {[`${indicator.Title}${indicator.referenceNumber}`]: indicator.metrics.split(",")}
       })
 
       // Convert the text to BLOB.
@@ -314,8 +305,8 @@ export class DisplayComponent implements OnInit {
     //our Map of selected indicators is transformed to an Array of [indicatorReference, indicator]
     [...this.indicatorMap.entries()].forEach(array => {
       if (array[1]) {
-        indicatorReferences.push(array[0]);
-        indicatorNames.push(array[1].indicatorName);
+        indicatorReferences.push(array[1].referenceNumber);
+        indicatorNames.push(array[1].Title);
       }
     })
 
@@ -347,14 +338,8 @@ export class DisplayComponent implements OnInit {
     document.getElementsByTagName("head")[0].appendChild(node);
   }
 
-  onReview(indic: any) {
-    const indicatorId = DisplayComponent.retrieveIndicatorReference(indic.indicatorName);
-    this.dialog.open(this.reviewDialog, {data: {...indic, indicatorId: indicatorId}});
-  }
-
-  static retrieveIndicatorReference(name: string) {
-    const matches = name.match(/\[.*?]/g)
-    return matches.length > 0 ? matches[0] : null;
+  onReview(indic: indicator) {
+    this.dialog.open(this.reviewDialog, {data: indic});
   }
 
   logIn() {
@@ -364,5 +349,11 @@ export class DisplayComponent implements OnInit {
   logout() {
     localStorage.removeItem('currentUser');
     this.loggedIn = undefined;
+  }
+
+  indicatorDeleted(indicator: indicator) {
+    if (this.checkedMap.get(indicator._id)) {
+      this.onCheckboxChange(indicator);
+    }
   }
 }

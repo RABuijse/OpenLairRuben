@@ -79,6 +79,11 @@ import { ReviewDisplayComponent } from './component/review-display/review-displa
 import {MatTooltipModule} from "@angular/material/tooltip";
 import { ReviewEditComponent } from './component/review-edit/review-edit.component';
 import { TableComponent } from './component/display/table/table.component';
+import {NgSelectModule} from "@ng-select/ng-select";
+import {AddReferenceComponent} from "./component/add-reference/add-reference.component";
+import {HeaderService} from "./component/header/header.service";
+import {TourService} from "../assets/js/tour.service";
+import {SuperAdminService} from "./superAdmin/super-admin.service";
 
 // const routes: Routes = [
 //   { path: "add", component: AddDataComponent, canActivate: [AuthGuardService]},
@@ -93,6 +98,7 @@ import { TableComponent } from './component/display/table/table.component';
   declarations: [
     AppComponent,
     AddDataComponent,
+    AddReferenceComponent,
     HeaderComponent,
     DisplayComponent,
     SanitizeHtmlPipe,
@@ -147,6 +153,7 @@ import { TableComponent } from './component/display/table/table.component';
     AppRoutingModule,
     FormsModule,
     ReactiveFormsModule,
+    NgSelectModule,
     //RouterModule.forRoot(routes),
     BrowserAnimationsModule,
     MatInputModule,
@@ -166,7 +173,7 @@ import { TableComponent } from './component/display/table/table.component';
     MatTooltipModule
   ],
 
-  providers: [DataService, AuthGuardService, ChartHelperService],
+  providers: [DataService, AuthGuardService, SuperAdminService, ChartHelperService, HeaderService, TourService],
 
   bootstrap: [AppComponent],
 })

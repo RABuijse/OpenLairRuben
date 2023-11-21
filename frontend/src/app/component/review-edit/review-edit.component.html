@@ -1,5 +1,5 @@
-<div class="outer-div">
-  <h2> Create Review for "{{indicator.indicatorName}}"</h2>
+<div *ngIf="indicator" class="outer-div">
+  <h2> Create Review for "{{indicator.Title}}"</h2>
 
   <form [formGroup]="formGroup" (ngSubmit)="onSubmit()">
 

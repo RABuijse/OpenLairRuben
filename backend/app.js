@@ -6,7 +6,10 @@ var _mongoose = _interopRequireDefault(require("mongoose"));
 
 //var _data = _interopRequireDefault(require("./models/data.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(obj) {
+    return obj && obj.__esModule ? obj : {default: obj};
+}
+
 //import data from './models/data.js';
 
 const multipart = require('connect-multiparty');
@@ -44,261 +47,358 @@ app.use(_bodyParser.default.json()); // app.use((req, res, next)=>{
 //   next();  
 // }); 
 
-MongoClient.connect(mongoURL, { useUnifiedTopology: true }, function (err, db) {
-  if (err) throw err;
-  var db = db.db("mydb1");  // database name
-  console.log("Mongodb connected successfully");
+MongoClient.connect(mongoURL, {useUnifiedTopology: true}, function (err, db) {
+    if (err) throw err;
+    var db = db.db("mydb1");  // database name
+    console.log("Mongodb connected successfully");
 
-  ///////////// Authentication /////////////////
+    ///////////// Authentication /////////////////
 
-  router.route('/login').post((req, res) => {
-    var username = req.body.username;
-    var password = req.body.password;
+    router.route('/login').post((req, res) => {
+        var username = req.body.username;
+        var password = req.body.password;
 
-    db.collection("login").findOne({
-      username: username,
-      password: password
-    }, function (err, user) {
-      if (err) {
-        console.log(err);
-      }
-      if (!user) {
-        console.log('User not found');
-        return res.send('User not found')
-        // return res.status(404).send();
-      }
-      return res.status(200).send(user);
-    })
-  })
-
-  /////////////Instruction for data display/////////////////
-
-  router.route('/display/data').get((req, res) => {
-
-    db.collection("treeStructure").find({}).toArray((err, data) => {
-      if (err)
-        console.log(err);
-      else
-        res.json(data);
+        db.collection("login").findOne({
+            username: username,
+            password: password
+        }, function (err, user) {
+            if (err) {
+                console.log(err);
+            }
+            if (!user) {
+                console.log('User not found');
+                return res.send('User not found')
+                // return res.status(404).send();
+            }
+            return res.status(200).send(user);
+        })
     })
 
-  });
+    /////////////Instruction for data display/////////////////
 
-  ////////////////Read text from pdf //////////////
+    router.route('/display/data').get((req, res) => {
 
-  var fs = require('fs');
+        db.collection("event").aggregate([
+            {
+                $lookup: {
+                    from: "activity",
+                    localField: "activityIds",
+                    foreignField: "_id",
+                    pipeline: [{
 
+                        $lookup: {
+                            from: "indicator",
+                            localField: "indicatorIds",
+                            foreignField: "_id",
+                            as: "indicators"
+                        }
 
-  /////////////Instruction for search data/////////////////
+                    }],
+                    as: "activities"
+                }
+            }
+        ]).toArray(function (error, result) {
+            if (err) throw error;
 
-  router.route('/getsearchmetrics').post((req, res) => {
-    const metrics_name = req.body.search;
+            res.send(result);
+        });
 
-
-    db.collection("treeStructure").find({'LearningActivities.indicator.metrics': new RegExp(metrics_name)}).toArray(function (error, documents) {
-      if (err) throw error;
-
-      res.send(documents);
     });
-  });
 
+    router.route('/events').get((req, res) => {
 
-  router.route('/getsearchindicator').post((req, res) => {
-    const search_ind = req.body.search;
+        db.collection("event").find().toArray(function (error, result) {
+            if (err) throw error;
 
+            res.send(result);
+        });
 
-    db.collection("treeStructure").find({'LearningActivities.indicator.indicatorName': {$regex: new RegExp(search_ind, "i")}}).toArray(function (error, result) {
-      if (err) throw error;
-
-      res.send(result);
     });
-  });
 
+    router.route('/activities').get((req, res) => {
 
-  /////////////Instruction for data addition/////////////////
-  ///////***********Add the indicator and metrics to all the similar learning activities AS similar activties can be found in multiple Events *****************/
-  router.route('/add/data').post((req, res) => {
-    let currentEvent = req.body.LearningEvents;
-    let currentActivity = req.body.LearningActivities.Name;
-    let newIndicatorMetrics = req.body.LearningActivities.indicator;
-    db.collection("treeStructure").find({
-      'LearningActivities.Name': currentActivity
-    }).toArray(function (error, filterAct) {
-      if (!error) {
-        if (filterAct) {
-          // let val = Object.keys(filterAct).length;
-          // if(val > 1)
-          // {
-          let i = 0;
-          //let allEvents = ;
-          Object.values(filterAct).forEach(val => {
-            //console.log("Event: ", val.LearningEvents);
-            const eventIndex = i++;
-            let position = filterAct[eventIndex].LearningActivities.findIndex(item => item.Name == currentActivity);
-            const str1 = 'LearningActivities';
-            const learningAct = str1.concat(".", position, ".", "indicator");
-            db.collection("treeStructure").updateOne({
-                  LearningEvents: val.LearningEvents
-                }, {
-                  $push: {
-                    [learningAct]: {
-                      "indicatorName": newIndicatorMetrics[0].indicatorName,
-                      "metrics": newIndicatorMetrics[0].metrics
+        db.collection("activity").find().toArray(function (error, result) {
+            if (err) throw error;
+
+            res.send(result);
+        });
+
+    });
+
+    router.route('/path/:id').get((req, res) => {
+
+        db.collection("indicator").findOne({_id: mongo.ObjectId(req.params.id)}, (error, indicator) => {
+            if (err) throw error;
+
+            db.collection("activity").findOne({"indicatorIds": mongo.ObjectId(req.params.id)}, (error, activity) => {
+                if (err) throw error;
+
+                db.collection("event").findOne({"activityIds": mongo.ObjectId(activity._id)}, (error, event) => {
+                    if (err) throw error;
+
+                    const pathObject = {
+                        event,
+                        activity,
+                        indicator
                     }
-                  }
-                }, {
-                  upsert: false,
-                  multi: true
-                },
-                function (err, res) {
-                  if (err) throw err;
+                    res.send(pathObject);
                 });
-          });
-          // }
-          // else {
-          // const eventIndex = filterAct.findIndex(element => element.LearningEvents === currentEvent);
-          // let position = filterAct[eventIndex].LearningActivities.findIndex(item => item.Name == currentActivity);
-          // const str1 = 'LearningActivities';
-          // const learningAct = str1.concat(".", position, ".", "indicator");
-          // db.collection("treeStructure").updateOne({
-          //   LearningEvents: currentEvent
-          // }, {
-          //   $push: {
-          //     [learningAct]: {
-          //       "indicatorName": newIndicatorMetrics[0].indicatorName,
-          //       "metrics": newIndicatorMetrics[0].metrics
-          //     }
-          //   }
-          // }, {
-          //   upsert: false,
-          //   multi: true
-          // },
-          //   function (err, res) {
-          //     if (err) throw err;
-          //   });
-          // }
-        }
-      }
+            });
+        });
     });
-  });
+
+    ////////////////Read text from pdf //////////////
+
+    var fs = require('fs');
 
 
-  //***********Add exactly what is selected by user *****************/
+    /////////////Instruction for search data/////////////////
 
-  // router.route('/add/data').post((req, res) => {
-  //   let currentEvent = req.body.LearningEvents;
-  //   let currentActivity = req.body.LearningActivities.Name;
-  //   let newIndicatorMetrics = req.body.LearningActivities.indicator;
-  //     db.collection("treeStructure").find({
-  //       'LearningActivities.Name': currentActivity
-  //     }).toArray(function (error, filterAct) {
-  //       if (!error) {
-  //         if (filterAct) {
-  //           const eventIndex = filterAct.findIndex(element => element.LearningEvents === currentEvent);
-  //           let position = filterAct[eventIndex].LearningActivities.findIndex(item => item.Name == currentActivity);
-  //           const str1 = 'LearningActivities';
-  //           const learningAct = str1.concat(".", position, ".", "indicator");
-  //           db.collection("treeStructure").updateOne({
-  //             LearningEvents: currentEvent
-  //           }, {
-  //             $push: {
-  //               [learningAct]: {
-  //                 "indicatorName": newIndicatorMetrics[0].indicatorName,
-  //                 "metrics": newIndicatorMetrics[0].metrics
-  //               }
-  //             }
-  //           }, {
-  //             upsert: false,
-  //             multi: true
-  //           },
-  //             function (err, res) {
-  //               if (err) throw err;
-  //             });
-  //         }
-  //       }
-  //     });
-  // });
+    router.route('/getsearchmetrics').post((req, res) => {
+        const metrics_name = req.body.search;
 
-  /////////////Instruction for review display/////////////////
 
-  router.route('/display/review/:id').get((req, res) => {
+        db.collection("treeStructure").find({'LearningActivities.indicator.metrics': new RegExp(metrics_name)}).toArray(function (error, documents) {
+            if (err) throw error;
 
-    db.collection("review").find({'indicatorId': req.params.id}).toArray((err, data) => {
-      if (err)
-        console.log(err);
-      else
-        res.json(data);
-    })
-
-  });
-
-  router.route('/display/review/:id/edit').get((req, res) => {
-
-    db.collection("review").find({'_id': mongo.ObjectId(req.params.id)}).toArray((err, data) => {
-      if (err)
-        console.log(err);
-      else
-        res.json(data);
-    })
-
-  });
-
-  router.route('/display/review/:indicatorId/:username').get((req, res) => {
-
-    db.collection("review").find({'indicatorId': req.params.indicatorId, 'name': req.params.username}).toArray((err, data) => {
-      if (err)
-        console.log(err);
-      else
-        res.json(data);
-    })
-
-  });
-
-  router.route('/review/add').post((req, res) => {
-    const review = req.body;
-    db.collection("review").insertOne(review, (error, result) => {
-      if (err) {
-        console.log(err);
-      }
-      return res.status(200).send(result);
+            res.send(documents);
+        });
     });
-  });
 
-  router.route('/review/edit').put((req, res) => {
-    const review = req.body;
-    db.collection("review").replaceOne({_id: mongo.ObjectId(review._id)},
-        {
-          "indicatorId": review.indicatorId,
-          "name": review.name,
-          "indicatorQuality": review.indicatorQuality,
-          "indicatorQualityNote": review.indicatorQualityNote,
-          "articleClarity": review.articleClarity,
-          "articleClarityNote": review.articleClarityNote,
-          "articleData": review.articleData,
-          "articleDataNote": review.articleDataNote,
-          "articleAnalysis": review.articleAnalysis,
-          "articleAnalysisNote": review.articleAnalysisNote,
-          "articleConclusion": review.articleConclusion,
-          "articleConclusionNote": review.articleConclusionNote,
-          "articleContribution": review.articleContribution,
-          "articleContributionNote": review.articleContributionNote
-        },
-        (error, result) => {
-      if (err) {
-        console.log(err);
-      }
-      return res.status(200).send(result);
-    });
-  });
 
-  router.route('/review/:reviewId/delete').delete((req, res) => {
-    db.collection("review").deleteOne({_id: mongo.ObjectId(req.params.reviewId)}, (error, result) => {
-      if (err) {
-        console.log(err);
-      }
-      return res.status(200).send(result);
+    router.route('/getsearchindicator').post((req, res) => {
+        const search_ind = req.body.search;
+
+
+        db.collection("treeStructure").find({'LearningActivities.indicator.indicatorName': {$regex: new RegExp(search_ind, "i")}}).toArray(function (error, result) {
+            if (err) throw error;
+
+            res.send(result);
+        });
     });
-  });
+
+
+    //////////////Indicator Stuff////////////////
+
+    router.route('/indicators').get((req, res) => {
+
+        db.collection("indicator").find().toArray(function (error, result) {
+            if (err) throw error;
+
+            res.send(result);
+        });
+
+    });
+
+    router.route('/indicator/:id').get((req, res) => {
+
+        db.collection("indicator").findOne({_id: mongo.ObjectId(req.params.id)},(error, indicator) => {
+            if (error) throw error;
+
+            res.send(indicator);
+        });
+
+    });
+
+    router.route('/indicator/add').post((req, res) => {
+        const activityId = req.body.activity._id;
+        const indicator = req.body.indicator;
+
+        db.collection('indicator').insertOne(indicator, (error, result) => {
+            if (err) {
+                console.log(err);
+            }
+            db.collection("activity").updateOne({'_id': mongo.ObjectId(activityId)}, {$push: {indicatorIds: indicator._id}}, (error2, result2) => {
+                if (error2) {
+                    console.log(error2)
+                } else {
+                    res.status(200).send(true)
+                }
+            })
+        });
+    });
+
+    router.route('/indicator/:id/edit').put((req, res) => {
+        const indicator = req.body;
+        db.collection("indicator").replaceOne({_id: mongo.ObjectId(req.params.id)},
+            {
+                "referenceNumber": indicator.referenceNumber,
+                "Title": indicator.Title,
+                "metrics": indicator.metrics,
+            },
+            (error, result) => {
+                if (err) {
+                    console.log(err);
+                }
+                return res.status(200).send(result);
+            });
+    });
+
+    router.route('/indicator/:indicatorId/delete').delete((req, res) => {
+        const indicatorId = req.params.indicatorId;
+        db.collection("activity").updateMany({"activityIds._id": indicatorId}, {
+            $pull: {activityIds: {indicatorId}}
+        }, (error, result) => {
+            if (error) {
+                console.log(error);
+            } else {
+                db.collection("indicator").deleteOne({_id: mongo.ObjectId(indicatorId)}, (error, result) => {
+                    if (err) {
+                        console.log(err);
+                    }
+                    return res.status(200).send(result);
+                });
+            }
+        })
+    });
+
+    /////////////Instruction for references/////////////////
+
+    router.route('/reference').get((req, res) => {
+        db.collection("reference").find().toArray((err, data) => {
+            if (err)
+                console.log(err);
+            else
+                res.json(data);
+        })
+    });
+
+    router.route('/reference/:id').get((req, res) => {
+        db.collection("reference").findOne({'_id': mongo.ObjectId(req.params.id)}, (err, reference) => {
+            if (err)
+                console.log(err);
+            else
+                res.send(reference);
+        })
+    });
+
+    router.route('/reference/number/:number').get((req, res) => {
+        db.collection("reference").findOne({'referenceNumber': req.params.number}, (err, reference) => {
+            if (err)
+                console.log(err);
+            else
+                res.send(reference);
+        })
+    });
+
+    router.route('/reference/add').post((req, res) => {
+        const reference = req.body;
+        db.collection("reference").insertOne(reference, (error, result) => {
+            if (err) {
+                console.log(err);
+            }
+            return res.status(200).send(result);
+        });
+    });
+
+    router.route('/reference/:id/edit').put((req, res) => {
+        const reference = req.body;
+        db.collection("reference").replaceOne({_id: mongo.ObjectId(req.params.id)},
+            {
+                "referenceNumber": reference.referenceNumber,
+                "referenceText": reference.referenceText,
+                "link": reference.link,
+            },
+            (error, result) => {
+                if (err) {
+                    console.log(err);
+                }
+                return res.status(200).send(result);
+            });
+    });
+
+    router.route('/reference/:referenceId/delete').delete((req, res) => {
+        db.collection("reference").deleteOne({_id: mongo.ObjectId(req.params.referenceId)}, (error, result) => {
+            if (err) {
+                console.log(err);
+            }
+            return res.status(200).send(result);
+        });
+    });
+
+    /////////////Instruction for review display/////////////////
+
+    router.route('/display/review/:id').get((req, res) => {
+
+        db.collection("review").find({'indicatorId': req.params.id}).toArray((err, data) => {
+            if (err)
+                console.log(err);
+            else
+                res.json(data);
+        })
+
+    });
+
+    router.route('/display/review/:id/edit').get((req, res) => {
+
+        db.collection("review").findOne({'_id': mongo.ObjectId(req.params.id)},(err, data) => {
+            if (err)
+                console.log(err);
+            else
+                res.json(data);
+        })
+
+    });
+
+    router.route('/display/review/:indicatorId/:username').get((req, res) => {
+
+        db.collection("review").findOne({
+                'indicatorId': req.params.indicatorId,
+                'name': req.params.username
+            }, (err, review) => {
+                if (err)
+                    console.log(err);
+                else
+                    res.json(review);
+            }
+        );
+    });
+
+    router.route('/review/add').post((req, res) => {
+        const review = req.body;
+        db.collection("review").insertOne(review, (error, result) => {
+            if (err) {
+                console.log(err);
+            }
+            return res.status(200).send(result);
+        });
+    });
+
+    router.route('/review/edit').put((req, res) => {
+        const review = req.body;
+        db.collection("review").replaceOne({_id: mongo.ObjectId(review._id)},
+            {
+                "indicatorId": review.indicatorId,
+                "name": review.name,
+                "indicatorQuality": review.indicatorQuality,
+                "indicatorQualityNote": review.indicatorQualityNote,
+                "articleClarity": review.articleClarity,
+                "articleClarityNote": review.articleClarityNote,
+                "articleData": review.articleData,
+                "articleDataNote": review.articleDataNote,
+                "articleAnalysis": review.articleAnalysis,
+                "articleAnalysisNote": review.articleAnalysisNote,
+                "articleConclusion": review.articleConclusion,
+                "articleConclusionNote": review.articleConclusionNote,
+                "articleContribution": review.articleContribution,
+                "articleContributionNote": review.articleContributionNote
+            },
+            (error, result) => {
+                if (err) {
+                    console.log(err);
+                }
+                return res.status(200).send(result);
+            });
+    });
+
+    router.route('/review/:reviewId/delete').delete((req, res) => {
+        db.collection("review").deleteOne({_id: mongo.ObjectId(req.params.reviewId)}, (error, result) => {
+            if (err) {
+                console.log(err);
+            }
+            return res.status(200).send(result);
+        });
+    });
 
 });
 

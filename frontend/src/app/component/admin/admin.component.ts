@@ -25,7 +25,6 @@ export class AdminComponent implements OnInit {
 
 
     });
-/////////////////////////////HIER MAYBE
     if (this.router.getCurrentNavigation().extras.state) {
       this.currentUrl = this.router.getCurrentNavigation().extras.state.url;
       this.additionalInfo = this.router.getCurrentNavigation().extras.state.additionalInfo;

@@ -1,4 +1,5 @@
 import { Component, OnInit, HostListener } from "@angular/core";
+import {HeaderService} from "../header/header.service";
 
 @Component({
   selector: "app-dashboard",
@@ -8,7 +9,9 @@ import { Component, OnInit, HostListener } from "@angular/core";
 export class DashboardComponent implements OnInit {
   isSticky: boolean = false;
   element = document.getElementById("header");
-  constructor() {}
+  constructor(headerService: HeaderService) {
+    headerService.setHeader('visualize')
+  }
 
   ngOnInit() {}
 

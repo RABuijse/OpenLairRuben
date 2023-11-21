@@ -1,10 +1,10 @@
 <table>
   <tr>
-    <th>Learning Events</th>
+    <th style="width: 120px">Learning Events</th>
     <th>
       <div>
-        <span class="learningactivities">(Learning) Activities</span>
-        <span style="margin-left: 2em">Indicators</span>
+        <span class="learningactivities">Learning<br>Activities</span>
+        <span style="margin-left: 6.5em">Indicators</span>
       </div>
     </th>
   </tr>
@@ -12,29 +12,44 @@
   <!-- for loop for learning events -->
   <tr *ngFor="let learningEvents of data">
     <td class="leraningevents">
-      {{ learningEvents.LearningEvents }}
+      {{ learningEvents.name }}
     </td>
     <td>
       <table class="w-100">
-        <tr class="activities" *ngFor="let LearningActivities of learningEvents.LearningActivities">
+        <tr class="activities" *ngFor="let LearningActivities of learningEvents.activities">
           <td class="learningactivities">
-            {{ LearningActivities.Name }}
+            {{ LearningActivities.name }}
           </td>
           <td>
             <table class="w-100">
-              <tr *ngFor="let indic of LearningActivities.indicator" class="indicator">
+              <tr *ngFor="let indic of LearningActivities.indicators" class="indicator">
                 <td [ngClass]="{'w-50': searchMat}" style="min-width: 730px">
-                  <input *ngIf="indic.indicatorName" class="step4" #indicatorCheckbox type="checkbox"
-                         [checked]="checkedMap.get(DisplayComponent.retrieveIndicatorReference(indic.indicatorName))"
-                         (click)="onCheckboxChange(indic)"/>
-
-                  <a class="sortable stepViewMetrics" (click)="getMetericsEmitter.emit(indic)">
-                        <span [innerHTML]="indic.indicatorName | sanitizeHtml: searchInd">
+                  <div class="indicator-content">
+                    <input *ngIf="indic" class="step4" #indicatorCheckbox type="checkbox"
+                           [checked]="checkedMap.get(indic._id)"
+                           (click)="onCheckboxChange(indic)"/>
+                    <div class="indicator-text">
+                      <a class="sortable stepViewMetrics" (click)="getMetericsEmitter.emit(indic)">
+                        <span [innerHTML]="getFullIndicatorName(indic) | sanitizeHtml: searchInd">
                         </span>
-                  </a>
-                  <a class="sortable mx-1 stepReview" (click)="onReviewEmitter.emit(indic)">
-                    <i class="fa fa-star-o"></i>
-                  </a>
+                      </a>
+                      <div>
+                      <a class="sortable review-icon stepReview" (click)="onReviewEmitter.emit(indic)">
+                        <i class="fa fa-star-o"></i>
+                      </a>
+                      <a class="sortable reference-icon stepReference" (click)="navigateToReferenceLink(indic)">
+                        <i class="fa fa-hand-o-right"></i>
+                      </a>
+                      <a *ngIf="loggedIn?.superAdmin" class="superAdmin-icon edit" (click)="editAsSuperAdmin(indic)">
+                        <i class="fa fa-pencil"></i>
+                      </a>
+                      <a *ngIf="loggedIn?.superAdmin" class="superAdmin-icon delete"
+                         (click)="deleteAsSuperAdmin(indic)">
+                        <i class="fa fa-trash"></i>
+                      </a>
+                      </div>
+                    </div>
+                  </div>
                 </td>
                 <td *ngIf="searchMat" class="w-50">
                   <a class="sortable">

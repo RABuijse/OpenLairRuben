@@ -1,10 +1,8 @@
 $(document).ready(function () {
 
   $('#tooltipEvents').tooltipster({
-    //'theme': 'tooltipster-shadow',
     'interactive': true,
     'contentAsHTML': true,
-    //'autoClose': true,
     'trigger': 'click',
     functionInit: function (instance, helper) {
       var $origin = $(helper.origin);

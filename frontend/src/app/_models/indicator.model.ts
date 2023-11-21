@@ -1,5 +1,6 @@
 export interface indicator {
-  indicatorName?: string;
-  indicatorId?: string;
+  _id?: any;
+  Title?: string;
+  referenceNumber?: string;
   metrics?: string;
 }
