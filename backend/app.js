@@ -37,7 +37,7 @@ const app = (0, _express.default)();
 const router = _express.default.Router();
 
 app.use((0, _cors.default)());
-app.use(_bodyParser.default.json()); // app.use((req, res, next)=>{  
+app.use(_bodyParser.default.json({limit: '10mb', extended: true}));// app.use((req, res, next)=>{
 //   res.setHeader("Access-Control-Allow-Origin", "*");
 //   res.setHeader(  
 //     "Access-Control-Allow-Headers",  
@@ -103,6 +103,25 @@ MongoClient.connect(mongoURL, {useUnifiedTopology: true}, function (err, db) {
             res.send(result);
         });
 
+    });
+
+    router.route('/generate/treeStructure').post((req, res) => {
+        const treeStructure = req.body;
+        treeStructure.forEach(event => {
+            event._id = mongo.ObjectId(event._id);
+        })
+
+        db.collection("treeStructure").deleteMany({}, (err, result) => {
+            if (err) console.log(err);
+            else {
+                db.collection("treeStructure").insertMany(treeStructure, (error, results) => {
+                    if (error) console.log(error);
+                    else {
+                        res.status(200).send(true);
+                    }
+                })
+            }
+        });
     });
 
     router.route('/events').get((req, res) => {

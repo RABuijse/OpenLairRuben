@@ -26,6 +26,7 @@ import {filter, map, shareReplay, tap} from "rxjs/operators";
 import {indicator} from "../../_models/indicator.model";
 import {HeaderService} from "../header/header.service";
 import {LearningActivity} from "../../_models/learningActivity.model";
+import {User} from "../../_models";
 
 @Component({
     selector: "app-display",
@@ -49,7 +50,7 @@ export class DisplayComponent implements OnInit {
     metrics: any;
     metrics_list: string[];
     reviews: review[];
-    loggedIn: any;
+    loggedIn: User;
     treeData$: Observable<LearningEvent[]>;
     learningEventsOptions$: Observable<string[]>;
     selectedLearningEvents$: Observable<LearningEvent[]>;
@@ -367,5 +368,34 @@ export class DisplayComponent implements OnInit {
         if (this.checkedMap.get(indicator._id)) {
             this.onCheckboxChange(indicator);
         }
+    }
+
+    generateTreeStructure() {
+        this.dataService.getdata().subscribe(treeDataNew => {
+            const oldTreeStructure = treeDataNew.map(event => {
+                return {
+                    _id: event._id,
+                    LearningEvents: event.name,
+                    LearningActivities: event.activities.map(activity => {
+                        return {
+                            Name: activity.name,
+                            indicator: activity.indicators.map(indicator => {
+                                return {
+                                    indicatorName: indicator.Title.trim() + " " + indicator.referenceNumber,
+                                    metrics: indicator.metrics
+                                }
+                            })
+                        }
+                    })
+                }
+            });
+            this.dataService.generateOldTreeStructure(oldTreeStructure).subscribe(success => {
+                if (success) {
+                    window.alert("Successfully generated TreeStructure");
+                } else {
+                    window.alert("Could not generate TreeStructure. Further information can be found in the logs");
+                }
+            });
+        })
     }
 }

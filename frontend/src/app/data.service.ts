@@ -163,6 +163,9 @@ export class DataService {
 
 
   }
+    generateOldTreeStructure(oldTreeStructure) {
+        return this.http.post(`${this.uri}/generate/treeStructure`, oldTreeStructure);
+    }
 }
 
 

@@ -169,6 +169,10 @@
       </button>
     </div>
 
+      <button *ngIf="loggedIn && loggedIn.superAdmin" (click)="generateTreeStructure()" class="buttonLaTool generateButton">
+          Generate Data for TreeStructure
+      </button>
+
     <label *ngIf="atLeastOneChecked()" class="selected-indicators-label"> Selected Indicator(s)</label>
     <div class="selected-indicators-wrapper">
       <ul id="reset" style="line-height: 17px; font-size: 15px" *ngFor="let selectInd of ind_list">
