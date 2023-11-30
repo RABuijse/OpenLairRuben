@@ -29,10 +29,6 @@ export class HeaderComponent implements OnInit {
     //this.router.navigate([]).then(result => {  window.open( `/referance`, '_blank'); });
   }
 
-  addReference() {
-    this.router.navigate(['/reference/add']);
-    //this.router.navigate([]).then(result => {  window.open( `/referance`, '_blank'); });
-  }
   references() {
     this.router.navigate(['/reference']);
     //this.router.navigate([]).then(result => {  window.open( `/referance`, '_blank'); });

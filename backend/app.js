@@ -136,12 +136,19 @@ MongoClient.connect(mongoURL, {useUnifiedTopology: true}, function (err, db) {
                 db.collection("event").findOne({"activityIds": mongo.ObjectId(activity._id)}, (error, event) => {
                     if (err) throw error;
 
-                    const pathObject = {
-                        event,
-                        activity,
-                        indicator
-                    }
-                    res.send(pathObject);
+                    db.collection("reference").findOne({'referenceNumber': indicator.referenceNumber}, (err, reference) => {
+                        if (err) console.log(err);
+                        else {
+                            const pathObject = {
+                                event,
+                                activity,
+                                indicator,
+                                reference
+                            }
+                            res.send(pathObject);
+                        }
+
+                    })
                 });
             });
         });
@@ -203,6 +210,7 @@ MongoClient.connect(mongoURL, {useUnifiedTopology: true}, function (err, db) {
     router.route('/indicator/add').post((req, res) => {
         const activityId = req.body.activity._id;
         const indicator = req.body.indicator;
+        const reference = req.body.reference;
 
         db.collection('indicator').insertOne(indicator, (error, result) => {
             if (err) {
@@ -212,7 +220,13 @@ MongoClient.connect(mongoURL, {useUnifiedTopology: true}, function (err, db) {
                 if (error2) {
                     console.log(error2)
                 } else {
-                    res.status(200).send(true)
+                    // res.status(200).send(true)
+                    db.collection("reference").insertOne(reference, (error, result) => {
+                        if (err) {
+                            console.log(err);
+                        }
+                        return res.status(200).send(result);
+                    });
                 }
             })
         });
@@ -279,16 +293,6 @@ MongoClient.connect(mongoURL, {useUnifiedTopology: true}, function (err, db) {
             else
                 res.send(reference);
         })
-    });
-
-    router.route('/reference/add').post((req, res) => {
-        const reference = req.body;
-        db.collection("reference").insertOne(reference, (error, result) => {
-            if (err) {
-                console.log(err);
-            }
-            return res.status(200).send(result);
-        });
     });
 
     router.route('/reference/:id/edit').put((req, res) => {
