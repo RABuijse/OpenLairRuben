@@ -400,12 +400,14 @@ MongoClient.connect(mongoURL, {useUnifiedTopology: true}, function (err, db) {
             });
     });
 
-    router.route('/reference/:referenceId/delete').delete((req, res) => {
+    router.route('/reference/:referenceId/:referenceNumber/delete').delete((req, res) => {
         db.collection("reference").deleteOne({_id: mongo.ObjectId(req.params.referenceId)}, (error, result) => {
             if (err) {
                 console.log(err);
             }
-            return res.status(200).send(result);
+            db.collection("indicator").updateMany({referenceNumber: req.params.referenceNumber}, {$set:{referenceNumber: "[0]"}}, (error, result2) => {
+                return res.status(200).send(result2);
+            });
         });
     });
 

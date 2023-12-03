@@ -351,6 +351,8 @@ export class DisplayComponent implements OnInit {
         this.dataService.getReferenceByReferenceNumber(indicator.referenceNumber).subscribe(reference => {
             if (reference) {
                 this.dialog.open(this.verdictDialog, {data: reference});
+            } else {
+                window.alert('Reference has been deleted.')
             }
         })
     }

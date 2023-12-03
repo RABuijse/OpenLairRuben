@@ -102,8 +102,8 @@ export class DataService {
         return this.http.put(`${this.uri}/reference/${id}/edit`, reference);
     }
 
-    deleteReference(referenceId: string) {
-        return this.http.delete(`${this.uri}/reference/${referenceId}/delete`);
+    deleteReference(reference: Reference) {
+        return this.http.delete(`${this.uri}/reference/${reference._id}/${reference.referenceNumber}/delete`);
     }
 
     getsearchresult(search: any) {
