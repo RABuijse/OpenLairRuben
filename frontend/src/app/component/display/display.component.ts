@@ -422,4 +422,8 @@ export class DisplayComponent implements OnInit {
         }
         newLink.click();
     }
+
+    editReference(id: string) {
+        this.router.navigate([`reference/${id}/edit`]);
+    }
 }
