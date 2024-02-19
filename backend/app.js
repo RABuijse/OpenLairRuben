@@ -22,9 +22,6 @@ var MongoClient = require('mongodb').MongoClient;
 
 var mongoURL = "mongodb://localhost:27017/" //Local MongoDB
 
-//var mongoURL = "mongodb://mongo:27017/" //Local MongoDB Docker (mongo)
-
-
 //console.log(mongoURL);
 
 const PORT = process.env.PORT || 3001;
