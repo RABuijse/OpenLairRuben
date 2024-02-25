@@ -217,7 +217,6 @@ export class AddDataComponent implements OnInit {
         switch (this.target) {
             case 'indicator':
                 if (!this.indicatorForm.valid) {
-                    console.log('not valid')
                     return
                 }
 
