@@ -62,6 +62,10 @@
                             Metrics are required.
                         </div>
                     </div>
+                    <div class="form-section" *ngIf="superAdmin">
+                        <input type="checkbox" formControlName="verified"/>
+                        <label>Verified</label>
+                    </div>
                 </form>
             </fieldset>
             <fieldset>
@@ -119,7 +123,7 @@
                         </div>
                     </div>
                     <div class="form-section">
-                        <input type="checkbox" (change)="checkboxReferenceClicked()" [disabled]="target && !referenceZero"/>
+                        <input type="checkbox" formControlName="checkbox" (change)="checkboxReferenceClicked()"/>
                         <label>Use existing Reference</label>
                     </div>
                 </form>
@@ -161,5 +165,5 @@
     <mat-dialog-content>
         <div style="padding-bottom: 1em">The Indicator has been saved but has to be approved by an admin before being listed in the table.</div>
     </mat-dialog-content>
-    <button mat-button mat-dialog-close (click)="navigateToMainPage()">Close</button>
+    <button mat-button mat-dialog-close (click)="restForms()">Close</button>
 </ng-template>
