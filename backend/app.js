@@ -382,6 +382,23 @@ MongoClient.connect(mongoURL, {useUnifiedTopology: true}, function (err, db) {
             });
     });
 
+    router.route('/indicator/:id/mark').put((req, res) => {
+        const mark = req.body.marked;
+        const indicatorId = mongo.ObjectId(req.params.id);
+
+        db.collection("indicator").updateOne({_id: indicatorId},
+            {
+                $set: {reviewExists: mark}
+            },
+            (error, result) => {
+                if (err) {
+                    console.log(err);
+                } else {
+                    res.status(200).send(result)
+                }
+            });
+    });
+
     router.route('/indicator/:indicatorId/delete').delete((req, res) => {
         const indicatorId = req.params.indicatorId;
         db.collection("activity").updateMany({"indicatorIds": mongo.ObjectId(indicatorId)}, {
