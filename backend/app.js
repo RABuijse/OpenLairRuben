@@ -21,6 +21,10 @@ var MongoClient = require('mongodb').MongoClient;
 //var mongoURL =  process.env["MONGO_URL"]; // || "mongodb://localhost:27017/"
 
 var mongoURL = "mongodb://localhost:27017/" //Local MongoDB
+var dockerURL = "mongodb://host.docker.internal:27017/" //Local MongoDB
+
+//var mongoURL = "mongodb://mongo:27017/" //Local MongoDB Docker (mongo)
+
 
 //console.log(mongoURL);
 
@@ -44,8 +48,8 @@ app.use(_bodyParser.default.json({limit: '10mb', extended: true}));// app.use((r
 //   next();  
 // }); 
 
-MongoClient.connect(mongoURL, {useUnifiedTopology: true}, function (err, db) {
-    if (err) throw err;
+function callback(err, db) {
+
     var db = db.db("mydb1");  // database name
     console.log("Mongodb connected successfully");
 
@@ -572,7 +576,14 @@ MongoClient.connect(mongoURL, {useUnifiedTopology: true}, function (err, db) {
             return res.status(200).send(result);
         });
     });
+}
 
+MongoClient.connect(mongoURL, {useUnifiedTopology: true}, function (err, db) {
+  if (err) MongoClient.connect(dockerURL, { useUnifiedTopology: true }, function (err, db) {
+    if (err) throw err;
+    else callback(err, db)
+  })
+  else callback(err, db)
 });
 
 app.get("/" + BASE_ROUTE, (req, res) => res.send('HELLO! From Backend'));
